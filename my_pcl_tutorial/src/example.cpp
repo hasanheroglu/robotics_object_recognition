@@ -116,7 +116,10 @@ cloud_cb(const sensor_msgs::PointCloud2ConstPtr& input){
   extract.setNegative (false);
   pcl::PointCloud<PointT>::Ptr cloud_cylinder (new pcl::PointCloud<PointT> ());
   extract.filter (*cloud_cylinder);
-  if (cloud_cylinder->points.empty ()) 
+
+  std::cerr << cloud_filtered2->size() << std::endl;
+
+  if (cloud_cylinder->points.empty () || cloud_cylinder->size() < cloud_filtered2->size() / 4) 
     std::cerr << "Can't find the cylindrical component." << std::endl;
   else 
   {
@@ -126,9 +129,7 @@ cloud_cb(const sensor_msgs::PointCloud2ConstPtr& input){
 
   }
 
-  //pcl_msgs::ModelCoefficients ros_coefficients;
-  //pcl_conversions::fromPCL(*coefficients_cylinder, ros_coefficients);
-  //pub.publish(ros_coefficients); 
+
   plane_pub.publish(cloud_plane);
   cylinder_pub.publish(cloud_cylinder);
 
@@ -146,7 +147,6 @@ main (int argc, char** argv)
   ros::Subscriber sub = nh.subscribe ("/camera/depth/points", 1, cloud_cb);
 
   // Create a ROS publisher for the output point cloud
-  //pub = nh.advertise<pcl_msgs::ModelCoefficients> ("output", 1);
   plane_pub = nh.advertise<PCLCloud> ("plane_output", 1);
   cylinder_pub = nh.advertise<PCLCloud> ("cylinder_output", 1);
 
